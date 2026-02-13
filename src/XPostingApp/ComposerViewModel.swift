@@ -220,21 +220,7 @@ final class ComposerViewModel: ObservableObject {
             defer { isSavingSettings = false }
 
             do {
-                guard let baseURL = URL(string: deepSeekBaseURL) else {
-                    throw XPostingError.service("DeepSeek base URL is invalid.")
-                }
-
-                let settings = AppSettings(
-                    deepSeekBaseURL: baseURL,
-                    deepSeekModel: deepSeekModel,
-                    deepSeekAPIKey: deepSeekAPIKey,
-                    defaultPreset: selectedPreset,
-                    defaultOutputLanguage: selectedOutputLanguage,
-                    xClientID: xClientID,
-                    xRedirectURI: xRedirectURI
-                )
-                try await settingsStore.save(settings)
-
+                try await persistXSettings()
                 setStatus("Settings saved.", isError: false)
             } catch {
                 setStatus("Failed to save settings: \(error.localizedDescription)", isError: true)
@@ -244,6 +230,7 @@ final class ComposerViewModel: ObservableObject {
 
     func startXOAuth() async -> URL? {
         do {
+            try await persistXSettings()
             let request = try await authService.createAuthorizationRequest()
             pendingOAuthState = request.state
             pendingOAuthCodeVerifier = request.codeVerifier
@@ -319,6 +306,22 @@ final class ComposerViewModel: ObservableObject {
         }
 
         refreshAnalysis()
+    }
+
+    private func persistXSettings() async throws {
+        guard let baseURL = URL(string: deepSeekBaseURL) else {
+            throw XPostingError.service("DeepSeek base URL is invalid.")
+        }
+        let settings = AppSettings(
+            deepSeekBaseURL: baseURL,
+            deepSeekModel: deepSeekModel,
+            deepSeekAPIKey: deepSeekAPIKey,
+            defaultPreset: selectedPreset,
+            defaultOutputLanguage: selectedOutputLanguage,
+            xClientID: xClientID,
+            xRedirectURI: xRedirectURI
+        )
+        try await settingsStore.save(settings)
     }
 
     private func loadImageDataIfNeeded() throws -> Data? {
