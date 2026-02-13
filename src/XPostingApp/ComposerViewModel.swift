@@ -36,6 +36,7 @@ final class ComposerViewModel: ObservableObject {
     private let publishService: XPublishService
 
     private var hasBootstrapped = false
+    private var hasLoadedXCredentials = false
 
     init(
         draftStore: DraftStore,
@@ -245,6 +246,7 @@ final class ComposerViewModel: ObservableObject {
                     accessTokenSecret: xAccessTokenSecret.trimmingCharacters(in: .whitespacesAndNewlines)
                 )
                 try await credentialService.save(credentials)
+                hasLoadedXCredentials = true
                 xConnected = true
                 setStatus("X account connected.", isError: false)
             } catch {
@@ -257,6 +259,7 @@ final class ComposerViewModel: ObservableObject {
         Task {
             do {
                 try await credentialService.clear()
+                hasLoadedXCredentials = true
                 xAPIKey = ""
                 xAPIKeySecret = ""
                 xAccessToken = ""
@@ -266,6 +269,25 @@ final class ComposerViewModel: ObservableObject {
             } catch {
                 setStatus("Failed to disconnect X account: \(error.localizedDescription)", isError: true)
             }
+        }
+    }
+
+    func ensureXCredentialsLoaded() async {
+        guard !hasLoadedXCredentials else { return }
+        hasLoadedXCredentials = true
+
+        do {
+            if let creds = try await credentialService.load() {
+                xAPIKey = creds.apiKey
+                xAPIKeySecret = creds.apiKeySecret
+                xAccessToken = creds.accessToken
+                xAccessTokenSecret = creds.accessTokenSecret
+                xConnected = true
+            } else {
+                xConnected = false
+            }
+        } catch {
+            setStatus("Failed to read X auth status: \(error.localizedDescription)", isError: true)
         }
     }
 
@@ -279,18 +301,6 @@ final class ComposerViewModel: ObservableObject {
         deepSeekBaseURL = settings.deepSeekBaseURL.absoluteString
         deepSeekModel = settings.deepSeekModel
         deepSeekAPIKey = settings.deepSeekAPIKey
-
-        do {
-            if let creds = try await credentialService.load() {
-                xAPIKey = creds.apiKey
-                xAPIKeySecret = creds.apiKeySecret
-                xAccessToken = creds.accessToken
-                xAccessTokenSecret = creds.accessTokenSecret
-                xConnected = true
-            }
-        } catch {
-            setStatus("Failed to read X auth status: \(error.localizedDescription)", isError: true)
-        }
 
         refreshAnalysis()
     }

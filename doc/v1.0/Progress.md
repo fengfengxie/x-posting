@@ -40,3 +40,4 @@
 - UX polish: Added a leading icon to `Fix Text` (`wand.and.stars`) to match the icon+text button pattern used by `Attach Image`.
 - UX polish: Added a menubar `Homepage` button (next to `Settings`) that opens `https://x.com/_feng_xie` for quick post-check access.
 - UX polish: Repositioned `Homepage` to the panel header (top-right, same row as `Quick Draft`) for faster access and less footer clutter.
+- Bugfix: Deferred Keychain credential reads until needed (e.g., Settings open / publish flow) instead of loading at app bootstrap, so startup no longer triggers immediate Keychain prompts.

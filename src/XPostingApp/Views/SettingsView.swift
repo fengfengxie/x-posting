@@ -75,8 +75,11 @@ struct SettingsView: View {
         .frame(width: 600)
         .onAppear {
             viewModel.bootstrapIfNeeded()
-            syncDraftsFromViewModel()
             activateSettingsWindow()
+            Task {
+                await viewModel.ensureXCredentialsLoaded()
+                syncDraftsFromViewModel()
+            }
         }
         .onChange(of: viewModel.xAPIKey) { _, _ in
             if focusedField != .apiKey { xAPIKeyDraft = viewModel.xAPIKey }
