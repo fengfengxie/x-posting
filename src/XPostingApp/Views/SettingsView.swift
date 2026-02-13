@@ -5,6 +5,17 @@ struct SettingsView: View {
     @ObservedObject var viewModel: ComposerViewModel
 
     @Environment(\.openURL) private var openURL
+    @FocusState private var focusedField: FocusedField?
+
+    @State private var xClientIDDraft: String = ""
+    @State private var xRedirectURIDraft: String = "xposting://oauth/callback"
+    @State private var callbackURLDraft: String = ""
+
+    private enum FocusedField: Hashable {
+        case clientID
+        case redirectURI
+        case callbackURL
+    }
 
     var body: some View {
         Form {
@@ -22,8 +33,17 @@ struct SettingsView: View {
             }
 
             Section("X API") {
-                TextField("Client ID", text: $viewModel.xClientID)
-                TextField("Redirect URI", text: $viewModel.xRedirectURI)
+                HStack {
+                    TextField("Client ID", text: $xClientIDDraft)
+                        .focused($focusedField, equals: .clientID)
+                    Button("Paste") {
+                        if let value = NSPasteboard.general.string(forType: .string) {
+                            xClientIDDraft = value
+                        }
+                    }
+                }
+                TextField("Redirect URI", text: $xRedirectURIDraft)
+                    .focused($focusedField, equals: .redirectURI)
 
                 HStack {
                     Text(viewModel.xConnected ? "Connected" : "Not Connected")
@@ -32,6 +52,7 @@ struct SettingsView: View {
                     Spacer()
 
                     Button("Start OAuth") {
+                        syncXDraftsToViewModel()
                         Task {
                             if let url = await viewModel.startXOAuth() {
                                 openURL(url)
@@ -45,14 +66,17 @@ struct SettingsView: View {
                     .disabled(!viewModel.xConnected)
                 }
 
-                TextField("Callback URL (optional manual completion)", text: $viewModel.callbackURLInput)
+                TextField("Callback URL (optional manual completion)", text: $callbackURLDraft)
+                    .focused($focusedField, equals: .callbackURL)
                 Button("Complete OAuth With Callback URL") {
+                    syncXDraftsToViewModel()
                     viewModel.completeOAuthFromInput()
                 }
             }
 
             Section {
                 Button("Save Settings") {
+                    syncXDraftsToViewModel()
                     viewModel.saveSettings()
                 }
                 .disabled(viewModel.isSavingSettings)
@@ -66,7 +90,36 @@ struct SettingsView: View {
         .padding(12)
         .frame(width: 600)
         .onAppear {
+            NSApp.activate(ignoringOtherApps: true)
             viewModel.bootstrapIfNeeded()
+            syncDraftsFromViewModel()
         }
+        .onChange(of: viewModel.xClientID) { _, _ in
+            if focusedField != .clientID {
+                xClientIDDraft = viewModel.xClientID
+            }
+        }
+        .onChange(of: viewModel.xRedirectURI) { _, _ in
+            if focusedField != .redirectURI {
+                xRedirectURIDraft = viewModel.xRedirectURI
+            }
+        }
+        .onChange(of: viewModel.callbackURLInput) { _, _ in
+            if focusedField != .callbackURL {
+                callbackURLDraft = viewModel.callbackURLInput
+            }
+        }
+    }
+
+    private func syncDraftsFromViewModel() {
+        xClientIDDraft = viewModel.xClientID
+        xRedirectURIDraft = viewModel.xRedirectURI
+        callbackURLDraft = viewModel.callbackURLInput
+    }
+
+    private func syncXDraftsToViewModel() {
+        viewModel.xClientID = xClientIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.xRedirectURI = xRedirectURIDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.callbackURLInput = callbackURLDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
