@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 import XPostingCore
@@ -5,7 +6,7 @@ import XPostingCore
 struct ComposerWindowView: View {
     @ObservedObject var viewModel: ComposerViewModel
 
-    @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
 
     @State private var isImporterPresented = false
 
@@ -83,7 +84,11 @@ struct ComposerWindowView: View {
                     Spacer()
 
                     Button("Settings") {
-                        openSettings()
+                        NSApp.activate(ignoringOtherApps: true)
+                        openWindow(id: "settings")
+                        DispatchQueue.main.async {
+                            NSApp.activate(ignoringOtherApps: true)
+                        }
                     }
                 }
                 .font(.caption)

@@ -27,3 +27,4 @@
 - OAuth completion currently supports callback URL handling and manual callback URL entry for MVP reliability.
 - Bugfix: DeepSeek API key is now directly editable/pastable in settings and saved in app settings (no Keychain fetch path for DeepSeek key).
 - Bugfix: X API settings inputs now use stable local edit state to prevent typing loss in Settings window, and settings window explicitly activates app focus on appear.
+- Bugfix: Settings moved from SwiftUI `Settings` scene to a dedicated window scene opened via `openWindow(id:)`, ensuring keyboard focus is captured instead of leaking to background terminal.

@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import XPostingCore
 
@@ -5,7 +6,6 @@ struct MenuBarContentView: View {
     @ObservedObject var viewModel: ComposerViewModel
 
     @Environment(\.openWindow) private var openWindow
-    @Environment(\.openSettings) private var openSettings
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -52,7 +52,11 @@ struct MenuBarContentView: View {
                 }
 
                 Button("Settings") {
-                    openSettings()
+                    NSApp.activate(ignoringOtherApps: true)
+                    openWindow(id: "settings")
+                    DispatchQueue.main.async {
+                        NSApp.activate(ignoringOtherApps: true)
+                    }
                 }
             }
             .buttonStyle(.borderless)

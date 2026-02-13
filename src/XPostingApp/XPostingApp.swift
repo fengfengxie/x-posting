@@ -15,8 +15,9 @@ struct XPostingApp: App {
         }
         .defaultSize(width: 980, height: 640)
 
-        Settings {
+        Window("x-posting Settings", id: "settings") {
             SettingsView(viewModel: viewModel)
         }
+        .defaultSize(width: 700, height: 520)
     }
 }
