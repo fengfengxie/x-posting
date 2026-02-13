@@ -39,16 +39,24 @@ public actor XAuthService {
         let codeChallenge = Self.codeChallenge(for: codeVerifier)
         let state = Self.randomURLSafe(length: 24)
 
-        var components = URLComponents(url: configuration.authorizeEndpoint, resolvingAgainstBaseURL: false)
-        components?.queryItems = [
-            URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "client_id", value: configuration.clientID),
-            URLQueryItem(name: "redirect_uri", value: configuration.redirectURI),
-            URLQueryItem(name: "scope", value: configuration.scopes.joined(separator: " ")),
-            URLQueryItem(name: "state", value: state),
-            URLQueryItem(name: "code_challenge", value: codeChallenge),
-            URLQueryItem(name: "code_challenge_method", value: "S256")
+        // Build query with strict RFC 3986 encoding — URLQueryItem leaves
+        // `:` and `/` unencoded, which can cause X to reject the redirect_uri.
+        let params: [(String, String)] = [
+            ("response_type", "code"),
+            ("client_id", configuration.clientID),
+            ("redirect_uri", configuration.redirectURI),
+            ("scope", configuration.scopes.joined(separator: " ")),
+            ("state", state),
+            ("code_challenge", codeChallenge),
+            ("code_challenge_method", "S256")
         ]
+        let unreserved = CharacterSet.alphanumerics.union(.init(charactersIn: "-._~"))
+        let query = params.map { key, value in
+            "\(key)=\(value.addingPercentEncoding(withAllowedCharacters: unreserved) ?? value)"
+        }.joined(separator: "&")
+
+        var components = URLComponents(url: configuration.authorizeEndpoint, resolvingAgainstBaseURL: false)
+        components?.percentEncodedQuery = query
 
         guard let url = components?.url else {
             throw XPostingError.service("Unable to build OAuth authorization URL.")
