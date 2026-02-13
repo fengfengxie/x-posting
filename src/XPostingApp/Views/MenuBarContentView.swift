@@ -52,11 +52,7 @@ struct MenuBarContentView: View {
                 }
 
                 Button("Settings") {
-                    NSApp.activate(ignoringOtherApps: true)
                     openWindow(id: "settings")
-                    DispatchQueue.main.async {
-                        NSApp.activate(ignoringOtherApps: true)
-                    }
                 }
             }
             .buttonStyle(.borderless)

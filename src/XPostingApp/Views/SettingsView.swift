@@ -90,9 +90,9 @@ struct SettingsView: View {
         .padding(12)
         .frame(width: 600)
         .onAppear {
-            NSApp.activate(ignoringOtherApps: true)
             viewModel.bootstrapIfNeeded()
             syncDraftsFromViewModel()
+            activateSettingsWindow()
         }
         .onChange(of: viewModel.xClientID) { _, _ in
             if focusedField != .clientID {
@@ -107,6 +107,16 @@ struct SettingsView: View {
         .onChange(of: viewModel.callbackURLInput) { _, _ in
             if focusedField != .callbackURL {
                 callbackURLDraft = viewModel.callbackURLInput
+            }
+        }
+    }
+
+    private func activateSettingsWindow() {
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        DispatchQueue.main.async {
+            for window in NSApp.windows where window.title.contains("Settings") {
+                window.makeKeyAndOrderFront(nil)
             }
         }
     }
