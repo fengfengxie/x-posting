@@ -36,3 +36,4 @@
 - UX refactor: Removed the independent composer window and removed `Open Composer`; compose/polish/publish/image actions now stay menubar-first.
 - Polish simplification: Removed tone/output-mode branching and switched to a single minimal-edit prompt that preserves authenticity and only fixes necessary typos/grammar/syntax.
 - UX polish: Menubar primary actions now emphasize separation between writing and posting: `Publish` appears first with a green prominent style, `Polish` was renamed to `Fix Text` with a blue prominent style, and the unused `Copy` button was removed.
+- UX polish: Kept `Publish` as the primary green action, moved `Fix Text` down before `Attach Image`, and aligned `Fix Text` styling to the same bordered secondary style as image actions.

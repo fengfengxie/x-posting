@@ -41,15 +41,16 @@ struct MenuBarContentView: View {
                 .tint(.green)
                 .disabled(viewModel.isPolishing || viewModel.isPublishing)
 
-                Button("Fix Text") {
-                    viewModel.polishDraft()
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.blue)
-                .disabled(viewModel.isPolishing || viewModel.isPublishing)
+                Spacer()
             }
 
             HStack {
+                Button("Fix Text") {
+                    viewModel.polishDraft()
+                }
+                .buttonStyle(.bordered)
+                .disabled(viewModel.isPolishing || viewModel.isPublishing)
+
                 Button {
                     openImagePanel()
                 } label: {
