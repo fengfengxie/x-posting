@@ -31,3 +31,4 @@
 - UX: Menubar `Open Composer` and `Settings` controls are now clearly styled as clickable buttons, and a `Quit` button was added to the menubar panel.
 - UI polish: Menubar quick draft editor now applies inner padding so typed text no longer visually collides with the editor border.
 - UX: Menubar quick draft now supports direct image attach/remove operations with attached-file visibility, so users can publish image posts without opening the full composer.
+- Bugfix: Menubar `Attach Image` now reliably reopens Finder on repeated clicks by forcing a fresh importer presentation state transition.

@@ -52,7 +52,7 @@ struct MenuBarContentView: View {
 
             HStack {
                 Button {
-                    isImporterPresented = true
+                    presentImageImporter()
                 } label: {
                     Label("Attach Image", systemImage: "paperclip")
                 }
@@ -126,6 +126,7 @@ struct MenuBarContentView: View {
             allowedContentTypes: [.image],
             allowsMultipleSelection: false
         ) { result in
+            isImporterPresented = false
             switch result {
             case .success(let urls):
                 if let url = urls.first {
@@ -138,6 +139,15 @@ struct MenuBarContentView: View {
         }
         .onAppear {
             viewModel.bootstrapIfNeeded()
+        }
+    }
+
+    private func presentImageImporter() {
+        // In MenuBarExtra windows the importer binding can remain true after dismissal.
+        // Force a false -> true transition so repeated clicks always reopen Finder.
+        isImporterPresented = false
+        DispatchQueue.main.async {
+            isImporterPresented = true
         }
     }
 }
