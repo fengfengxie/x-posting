@@ -38,7 +38,6 @@ final class ComposerViewModel: ObservableObject {
     private let authService: XAuthService
     private let publishService: XPublishService
 
-    private let deepSeekAPIKeyName = "deepseek.api.key"
     private var hasBootstrapped = false
     private var pendingOAuthState: String?
     private var pendingOAuthCodeVerifier: String?
@@ -70,9 +69,6 @@ final class ComposerViewModel: ObservableObject {
         let polishService = DeepSeekPolishService(
             settingsProvider: {
                 await settingsStore.load()
-            },
-            apiKeyProvider: {
-                try credentialStore.getString(for: "deepseek.api.key") ?? ""
             },
             limitService: limitService
         )
@@ -231,16 +227,13 @@ final class ComposerViewModel: ObservableObject {
                 let settings = AppSettings(
                     deepSeekBaseURL: baseURL,
                     deepSeekModel: deepSeekModel,
+                    deepSeekAPIKey: deepSeekAPIKey,
                     defaultPreset: selectedPreset,
                     defaultOutputLanguage: selectedOutputLanguage,
                     xClientID: xClientID,
                     xRedirectURI: xRedirectURI
                 )
                 try await settingsStore.save(settings)
-
-                if !deepSeekAPIKey.isEmpty {
-                    try credentialStore.setString(deepSeekAPIKey, for: deepSeekAPIKeyName)
-                }
 
                 setStatus("Settings saved.", isError: false)
             } catch {
@@ -314,15 +307,10 @@ final class ComposerViewModel: ObservableObject {
 
         deepSeekBaseURL = settings.deepSeekBaseURL.absoluteString
         deepSeekModel = settings.deepSeekModel
+        deepSeekAPIKey = settings.deepSeekAPIKey
 
         xClientID = settings.xClientID
         xRedirectURI = settings.xRedirectURI
-
-        do {
-            deepSeekAPIKey = try credentialStore.getString(for: deepSeekAPIKeyName) ?? ""
-        } catch {
-            setStatus("Failed to load DeepSeek API key: \(error.localizedDescription)", isError: true)
-        }
 
         do {
             xConnected = (try await authService.loadToken()) != nil

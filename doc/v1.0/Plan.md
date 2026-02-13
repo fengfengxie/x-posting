@@ -10,7 +10,8 @@
 - SwiftUI + MenuBarExtra for UI
 - AppKit utilities (clipboard)
 - URLSession for network calls
-- Keychain for secret/token storage
+- Keychain for X OAuth token storage
+- UserDefaults-backed settings storage for DeepSeek configuration and API key
 - Swift Package Manager build and test
 
 ## Data Model Plan

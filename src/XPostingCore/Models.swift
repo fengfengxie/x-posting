@@ -45,6 +45,7 @@ public struct Draft: Identifiable, Codable, Equatable, Sendable {
 public struct AppSettings: Codable, Sendable {
     public var deepSeekBaseURL: URL
     public var deepSeekModel: String
+    public var deepSeekAPIKey: String
     public var defaultPreset: PolishPreset
     public var defaultOutputLanguage: TargetOutputLanguage
     public var xClientID: String
@@ -53,6 +54,7 @@ public struct AppSettings: Codable, Sendable {
     public init(
         deepSeekBaseURL: URL = URL(string: "https://api.deepseek.com")!,
         deepSeekModel: String = "deepseek-chat",
+        deepSeekAPIKey: String = "",
         defaultPreset: PolishPreset = .concise,
         defaultOutputLanguage: TargetOutputLanguage = .auto,
         xClientID: String = "",
@@ -60,6 +62,7 @@ public struct AppSettings: Codable, Sendable {
     ) {
         self.deepSeekBaseURL = deepSeekBaseURL
         self.deepSeekModel = deepSeekModel
+        self.deepSeekAPIKey = deepSeekAPIKey
         self.defaultPreset = defaultPreset
         self.defaultOutputLanguage = defaultOutputLanguage
         self.xClientID = xClientID

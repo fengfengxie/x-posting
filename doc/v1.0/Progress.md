@@ -25,3 +25,4 @@
 - Date: 2026-02-13
 - Current publish integration includes single image upload path and thread posting logic.
 - OAuth completion currently supports callback URL handling and manual callback URL entry for MVP reliability.
+- Bugfix: DeepSeek API key is now directly editable/pastable in settings and saved in app settings (no Keychain fetch path for DeepSeek key).

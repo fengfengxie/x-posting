@@ -3,24 +3,21 @@ import Foundation
 public actor DeepSeekPolishService {
     private let httpClient: HTTPClient
     private let settingsProvider: @Sendable () async -> AppSettings
-    private let apiKeyProvider: @Sendable () async throws -> String
     private let limitService: CharacterLimitService
 
     public init(
         httpClient: HTTPClient = URLSession.shared,
         settingsProvider: @escaping @Sendable () async -> AppSettings,
-        apiKeyProvider: @escaping @Sendable () async throws -> String,
         limitService: CharacterLimitService = CharacterLimitService()
     ) {
         self.httpClient = httpClient
         self.settingsProvider = settingsProvider
-        self.apiKeyProvider = apiKeyProvider
         self.limitService = limitService
     }
 
     public func polish(_ request: PolishRequest) async throws -> PolishResponse {
         let settings = await settingsProvider()
-        let apiKey = try await apiKeyProvider()
+        let apiKey = settings.deepSeekAPIKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !apiKey.isEmpty else {
             throw XPostingError.missingConfiguration("DeepSeek API key is missing.")
         }

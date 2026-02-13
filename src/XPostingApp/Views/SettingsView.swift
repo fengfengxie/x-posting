@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
@@ -10,7 +11,14 @@ struct SettingsView: View {
             Section("DeepSeek") {
                 TextField("Base URL", text: $viewModel.deepSeekBaseURL)
                 TextField("Model", text: $viewModel.deepSeekModel)
-                SecureField("API Key", text: $viewModel.deepSeekAPIKey)
+                HStack {
+                    TextField("API Key", text: $viewModel.deepSeekAPIKey)
+                    Button("Paste") {
+                        if let value = NSPasteboard.general.string(forType: .string) {
+                            viewModel.deepSeekAPIKey = value
+                        }
+                    }
+                }
             }
 
             Section("X API") {
