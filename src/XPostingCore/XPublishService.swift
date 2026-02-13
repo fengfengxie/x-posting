@@ -15,17 +15,17 @@ public actor XPublishService {
     }
 
     private let httpClient: HTTPClient
-    private let accessTokenProvider: @Sendable () async throws -> String
+    private let signerProvider: @Sendable () async throws -> OAuth1Signer
     private let configuration: Configuration
 
     public init(
         httpClient: HTTPClient = URLSession.shared,
         configuration: Configuration = Configuration(),
-        accessTokenProvider: @escaping @Sendable () async throws -> String
+        signerProvider: @escaping @Sendable () async throws -> OAuth1Signer
     ) {
         self.httpClient = httpClient
         self.configuration = configuration
-        self.accessTokenProvider = accessTokenProvider
+        self.signerProvider = signerProvider
     }
 
     public func publish(_ plan: PublishPlan) async throws -> PublishResult {
@@ -33,14 +33,11 @@ public actor XPublishService {
             throw XPostingError.service("Cannot publish an empty post.")
         }
 
-        let accessToken = try await accessTokenProvider()
-        guard !accessToken.isEmpty else {
-            throw XPostingError.unauthorized
-        }
+        let signer = try await signerProvider()
 
         var mediaID: String?
         if let imageData = plan.imageData {
-            mediaID = try await uploadImage(imageData, accessToken: accessToken)
+            mediaID = try await uploadImage(imageData, signer: signer)
         }
 
         var postedIDs: [String] = []
@@ -52,7 +49,7 @@ public actor XPublishService {
                 text: segment.text,
                 replyToID: replyToID,
                 mediaID: attachMedia,
-                accessToken: accessToken
+                signer: signer
             )
             postedIDs.append(id)
             replyToID = id
@@ -61,13 +58,12 @@ public actor XPublishService {
         return PublishResult(success: true, postIDs: postedIDs)
     }
 
-    private func uploadImage(_ imageData: Data, accessToken: String) async throws -> String {
+    private func uploadImage(_ imageData: Data, signer: OAuth1Signer) async throws -> String {
         var request = URLRequest(url: configuration.mediaUploadEndpoint)
         request.httpMethod = "POST"
 
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
         var body = Data()
         body.append("--\(boundary)\r\n".data(using: .utf8)!)
@@ -76,6 +72,7 @@ public actor XPublishService {
         body.append(imageData)
         body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
         request.httpBody = body
+        request = signer.sign(request)
 
         let (data, response) = try await httpClient.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -91,11 +88,10 @@ public actor XPublishService {
         return decoded.mediaIDString
     }
 
-    private func createPost(text: String, replyToID: String?, mediaID: String?, accessToken: String) async throws -> String {
+    private func createPost(text: String, replyToID: String?, mediaID: String?, signer: OAuth1Signer) async throws -> String {
         var request = URLRequest(url: configuration.createPostEndpoint)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
 
         let payload = CreatePostRequest(
             text: text,
@@ -104,6 +100,7 @@ public actor XPublishService {
         )
 
         request.httpBody = try JSONEncoder().encode(payload)
+        request = signer.sign(request)
 
         let (data, response) = try await httpClient.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {

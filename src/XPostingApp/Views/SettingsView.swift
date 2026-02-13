@@ -4,17 +4,18 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var viewModel: ComposerViewModel
 
-    @Environment(\.openURL) private var openURL
     @FocusState private var focusedField: FocusedField?
 
-    @State private var xClientIDDraft: String = ""
-    @State private var xRedirectURIDraft: String = "xposting://oauth/callback"
-    @State private var callbackURLDraft: String = ""
+    @State private var xAPIKeyDraft: String = ""
+    @State private var xAPIKeySecretDraft: String = ""
+    @State private var xAccessTokenDraft: String = ""
+    @State private var xAccessTokenSecretDraft: String = ""
 
     private enum FocusedField: Hashable {
-        case clientID
-        case redirectURI
-        case callbackURL
+        case apiKey
+        case apiKeySecret
+        case accessToken
+        case accessTokenSecret
     }
 
     var body: some View {
@@ -33,17 +34,10 @@ struct SettingsView: View {
             }
 
             Section("X API") {
-                HStack {
-                    TextField("Client ID", text: $xClientIDDraft)
-                        .focused($focusedField, equals: .clientID)
-                    Button("Paste") {
-                        if let value = NSPasteboard.general.string(forType: .string) {
-                            xClientIDDraft = value
-                        }
-                    }
-                }
-                TextField("Redirect URI", text: $xRedirectURIDraft)
-                    .focused($focusedField, equals: .redirectURI)
+                credentialRow("API Key", draft: $xAPIKeyDraft, focus: .apiKey)
+                credentialRow("API Key Secret", draft: $xAPIKeySecretDraft, focus: .apiKeySecret)
+                credentialRow("Access Token", draft: $xAccessTokenDraft, focus: .accessToken)
+                credentialRow("Access Token Secret", draft: $xAccessTokenSecretDraft, focus: .accessTokenSecret)
 
                 HStack {
                     Text(viewModel.xConnected ? "Connected" : "Not Connected")
@@ -51,26 +45,16 @@ struct SettingsView: View {
 
                     Spacer()
 
-                    Button("Start OAuth") {
+                    Button("Connect") {
                         syncXDraftsToViewModel()
-                        Task {
-                            if let url = await viewModel.startXOAuth() {
-                                openURL(url)
-                            }
-                        }
+                        viewModel.connectX()
                     }
 
                     Button("Disconnect") {
                         viewModel.disconnectX()
+                        syncDraftsFromViewModel()
                     }
                     .disabled(!viewModel.xConnected)
-                }
-
-                TextField("Callback URL (optional manual completion)", text: $callbackURLDraft)
-                    .focused($focusedField, equals: .callbackURL)
-                Button("Complete OAuth With Callback URL") {
-                    syncXDraftsToViewModel()
-                    viewModel.completeOAuthFromInput()
                 }
             }
 
@@ -94,19 +78,28 @@ struct SettingsView: View {
             syncDraftsFromViewModel()
             activateSettingsWindow()
         }
-        .onChange(of: viewModel.xClientID) { _, _ in
-            if focusedField != .clientID {
-                xClientIDDraft = viewModel.xClientID
-            }
+        .onChange(of: viewModel.xAPIKey) { _, _ in
+            if focusedField != .apiKey { xAPIKeyDraft = viewModel.xAPIKey }
         }
-        .onChange(of: viewModel.xRedirectURI) { _, _ in
-            if focusedField != .redirectURI {
-                xRedirectURIDraft = viewModel.xRedirectURI
-            }
+        .onChange(of: viewModel.xAPIKeySecret) { _, _ in
+            if focusedField != .apiKeySecret { xAPIKeySecretDraft = viewModel.xAPIKeySecret }
         }
-        .onChange(of: viewModel.callbackURLInput) { _, _ in
-            if focusedField != .callbackURL {
-                callbackURLDraft = viewModel.callbackURLInput
+        .onChange(of: viewModel.xAccessToken) { _, _ in
+            if focusedField != .accessToken { xAccessTokenDraft = viewModel.xAccessToken }
+        }
+        .onChange(of: viewModel.xAccessTokenSecret) { _, _ in
+            if focusedField != .accessTokenSecret { xAccessTokenSecretDraft = viewModel.xAccessTokenSecret }
+        }
+    }
+
+    private func credentialRow(_ label: String, draft: Binding<String>, focus: FocusedField) -> some View {
+        HStack {
+            SecureField(label, text: draft)
+                .focused($focusedField, equals: focus)
+            Button("Paste") {
+                if let value = NSPasteboard.general.string(forType: .string) {
+                    draft.wrappedValue = value
+                }
             }
         }
     }
@@ -122,14 +115,16 @@ struct SettingsView: View {
     }
 
     private func syncDraftsFromViewModel() {
-        xClientIDDraft = viewModel.xClientID
-        xRedirectURIDraft = viewModel.xRedirectURI
-        callbackURLDraft = viewModel.callbackURLInput
+        xAPIKeyDraft = viewModel.xAPIKey
+        xAPIKeySecretDraft = viewModel.xAPIKeySecret
+        xAccessTokenDraft = viewModel.xAccessToken
+        xAccessTokenSecretDraft = viewModel.xAccessTokenSecret
     }
 
     private func syncXDraftsToViewModel() {
-        viewModel.xClientID = xClientIDDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        viewModel.xRedirectURI = xRedirectURIDraft.trimmingCharacters(in: .whitespacesAndNewlines)
-        viewModel.callbackURLInput = callbackURLDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.xAPIKey = xAPIKeyDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.xAPIKeySecret = xAPIKeySecretDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.xAccessToken = xAccessTokenDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        viewModel.xAccessTokenSecret = xAccessTokenSecretDraft.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

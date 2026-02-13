@@ -18,9 +18,10 @@ final class ComposerViewModel: ObservableObject {
     @Published var deepSeekModel: String = "deepseek-chat"
     @Published var deepSeekAPIKey: String = ""
 
-    @Published var xClientID: String = ""
-    @Published var xRedirectURI: String = "xposting://oauth/callback"
-    @Published var callbackURLInput: String = ""
+    @Published var xAPIKey: String = ""
+    @Published var xAPIKeySecret: String = ""
+    @Published var xAccessToken: String = ""
+    @Published var xAccessTokenSecret: String = ""
     @Published var xConnected: Bool = false
 
     @Published var statusMessage: String?
@@ -35,12 +36,10 @@ final class ComposerViewModel: ObservableObject {
     private let credentialStore: SecureCredentialStore
     private let limitService: CharacterLimitService
     private let polishService: DeepSeekPolishService
-    private let authService: XAuthService
+    private let credentialService: XCredentialService
     private let publishService: XPublishService
 
     private var hasBootstrapped = false
-    private var pendingOAuthState: String?
-    private var pendingOAuthCodeVerifier: String?
 
     init(
         draftStore: DraftStore,
@@ -48,7 +47,7 @@ final class ComposerViewModel: ObservableObject {
         credentialStore: SecureCredentialStore,
         limitService: CharacterLimitService,
         polishService: DeepSeekPolishService,
-        authService: XAuthService,
+        credentialService: XCredentialService,
         publishService: XPublishService
     ) {
         self.draftStore = draftStore
@@ -56,7 +55,7 @@ final class ComposerViewModel: ObservableObject {
         self.credentialStore = credentialStore
         self.limitService = limitService
         self.polishService = polishService
-        self.authService = authService
+        self.credentialService = credentialService
         self.publishService = publishService
     }
 
@@ -73,19 +72,13 @@ final class ComposerViewModel: ObservableObject {
             limitService: limitService
         )
 
-        let authService = XAuthService(
-            configurationProvider: {
-                let settings = await settingsStore.load()
-                return OAuthConfiguration(clientID: settings.xClientID, redirectURI: settings.xRedirectURI)
-            },
-            credentialStore: credentialStore
-        )
+        let credentialService = XCredentialService(credentialStore: credentialStore)
 
-        let publishService = XPublishService(accessTokenProvider: {
-            guard let token = try await authService.loadToken() else {
+        let publishService = XPublishService(signerProvider: {
+            guard let creds = try await credentialService.load() else {
                 throw XPostingError.unauthorized
             }
-            return token.accessToken
+            return OAuth1Signer(credentials: creds)
         })
 
         return ComposerViewModel(
@@ -94,7 +87,7 @@ final class ComposerViewModel: ObservableObject {
             credentialStore: credentialStore,
             limitService: limitService,
             polishService: polishService,
-            authService: authService,
+            credentialService: credentialService,
             publishService: publishService
         )
     }
@@ -220,7 +213,7 @@ final class ComposerViewModel: ObservableObject {
             defer { isSavingSettings = false }
 
             do {
-                try await persistXSettings()
+                try await persistSettings()
                 setStatus("Settings saved.", isError: false)
             } catch {
                 setStatus("Failed to save settings: \(error.localizedDescription)", isError: true)
@@ -228,52 +221,38 @@ final class ComposerViewModel: ObservableObject {
         }
     }
 
-    func startXOAuth() async -> URL? {
-        do {
-            try await persistXSettings()
-            let request = try await authService.createAuthorizationRequest()
-            pendingOAuthState = request.state
-            pendingOAuthCodeVerifier = request.codeVerifier
-            setStatus("Browser opened for X login. Complete login and provide callback URL if needed.", isError: false)
-            return request.url
-        } catch {
-            setStatus("Unable to start OAuth: \(error.localizedDescription)", isError: true)
-            return nil
-        }
-    }
-
-    func completeOAuthFromInput() {
-        guard let callbackURL = URL(string: callbackURLInput.trimmingCharacters(in: .whitespacesAndNewlines)) else {
-            setStatus("Callback URL is invalid.", isError: true)
+    func connectX() {
+        let fields = [xAPIKey, xAPIKeySecret, xAccessToken, xAccessTokenSecret]
+        guard fields.allSatisfy({ !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) else {
+            setStatus("All four X API credential fields are required.", isError: true)
             return
         }
 
         Task {
-            await handleOAuthCallback(callbackURL)
-        }
-    }
-
-    func handleOAuthCallback(_ url: URL) async {
-        guard let state = pendingOAuthState, let verifier = pendingOAuthCodeVerifier else {
-            setStatus("No OAuth request in progress.", isError: true)
-            return
-        }
-
-        do {
-            _ = try await authService.exchangeCode(from: url, expectedState: state, codeVerifier: verifier)
-            pendingOAuthState = nil
-            pendingOAuthCodeVerifier = nil
-            xConnected = true
-            setStatus("X account connected.", isError: false)
-        } catch {
-            setStatus("OAuth completion failed: \(error.localizedDescription)", isError: true)
+            do {
+                let credentials = XCredentials(
+                    apiKey: xAPIKey.trimmingCharacters(in: .whitespacesAndNewlines),
+                    apiKeySecret: xAPIKeySecret.trimmingCharacters(in: .whitespacesAndNewlines),
+                    accessToken: xAccessToken.trimmingCharacters(in: .whitespacesAndNewlines),
+                    accessTokenSecret: xAccessTokenSecret.trimmingCharacters(in: .whitespacesAndNewlines)
+                )
+                try await credentialService.save(credentials)
+                xConnected = true
+                setStatus("X account connected.", isError: false)
+            } catch {
+                setStatus("Failed to save X credentials: \(error.localizedDescription)", isError: true)
+            }
         }
     }
 
     func disconnectX() {
         Task {
             do {
-                try await authService.clearToken()
+                try await credentialService.clear()
+                xAPIKey = ""
+                xAPIKeySecret = ""
+                xAccessToken = ""
+                xAccessTokenSecret = ""
                 xConnected = false
                 setStatus("X account disconnected.", isError: false)
             } catch {
@@ -296,11 +275,14 @@ final class ComposerViewModel: ObservableObject {
         deepSeekModel = settings.deepSeekModel
         deepSeekAPIKey = settings.deepSeekAPIKey
 
-        xClientID = settings.xClientID
-        xRedirectURI = settings.xRedirectURI
-
         do {
-            xConnected = (try await authService.loadToken()) != nil
+            if let creds = try await credentialService.load() {
+                xAPIKey = creds.apiKey
+                xAPIKeySecret = creds.apiKeySecret
+                xAccessToken = creds.accessToken
+                xAccessTokenSecret = creds.accessTokenSecret
+                xConnected = true
+            }
         } catch {
             setStatus("Failed to read X auth status: \(error.localizedDescription)", isError: true)
         }
@@ -308,7 +290,7 @@ final class ComposerViewModel: ObservableObject {
         refreshAnalysis()
     }
 
-    private func persistXSettings() async throws {
+    private func persistSettings() async throws {
         guard let baseURL = URL(string: deepSeekBaseURL) else {
             throw XPostingError.service("DeepSeek base URL is invalid.")
         }
@@ -317,9 +299,7 @@ final class ComposerViewModel: ObservableObject {
             deepSeekModel: deepSeekModel,
             deepSeekAPIKey: deepSeekAPIKey,
             defaultPreset: selectedPreset,
-            defaultOutputLanguage: selectedOutputLanguage,
-            xClientID: xClientID,
-            xRedirectURI: xRedirectURI
+            defaultOutputLanguage: selectedOutputLanguage
         )
         try await settingsStore.save(settings)
     }

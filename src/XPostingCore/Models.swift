@@ -42,31 +42,39 @@ public struct Draft: Identifiable, Codable, Equatable, Sendable {
     }
 }
 
+public struct XCredentials: Codable, Sendable {
+    public let apiKey: String
+    public let apiKeySecret: String
+    public let accessToken: String
+    public let accessTokenSecret: String
+
+    public init(apiKey: String, apiKeySecret: String, accessToken: String, accessTokenSecret: String) {
+        self.apiKey = apiKey
+        self.apiKeySecret = apiKeySecret
+        self.accessToken = accessToken
+        self.accessTokenSecret = accessTokenSecret
+    }
+}
+
 public struct AppSettings: Codable, Sendable {
     public var deepSeekBaseURL: URL
     public var deepSeekModel: String
     public var deepSeekAPIKey: String
     public var defaultPreset: PolishPreset
     public var defaultOutputLanguage: TargetOutputLanguage
-    public var xClientID: String
-    public var xRedirectURI: String
 
     public init(
         deepSeekBaseURL: URL = URL(string: "https://api.deepseek.com")!,
         deepSeekModel: String = "deepseek-chat",
         deepSeekAPIKey: String = "",
         defaultPreset: PolishPreset = .concise,
-        defaultOutputLanguage: TargetOutputLanguage = .auto,
-        xClientID: String = "",
-        xRedirectURI: String = "xposting://oauth/callback"
+        defaultOutputLanguage: TargetOutputLanguage = .auto
     ) {
         self.deepSeekBaseURL = deepSeekBaseURL
         self.deepSeekModel = deepSeekModel
         self.deepSeekAPIKey = deepSeekAPIKey
         self.defaultPreset = defaultPreset
         self.defaultOutputLanguage = defaultOutputLanguage
-        self.xClientID = xClientID
-        self.xRedirectURI = xRedirectURI
     }
 }
 
@@ -128,59 +136,12 @@ public struct PublishResult: Sendable {
     }
 }
 
-public struct OAuthConfiguration: Sendable {
-    public let clientID: String
-    public let redirectURI: String
-    public let scopes: [String]
-    public let authorizeEndpoint: URL
-    public let tokenEndpoint: URL
-
-    public init(
-        clientID: String,
-        redirectURI: String,
-        scopes: [String] = ["tweet.read", "tweet.write", "users.read", "offline.access"],
-        authorizeEndpoint: URL = URL(string: "https://twitter.com/i/oauth2/authorize")!,
-        tokenEndpoint: URL = URL(string: "https://api.twitter.com/2/oauth2/token")!
-    ) {
-        self.clientID = clientID
-        self.redirectURI = redirectURI
-        self.scopes = scopes
-        self.authorizeEndpoint = authorizeEndpoint
-        self.tokenEndpoint = tokenEndpoint
-    }
-}
-
-public struct OAuthToken: Codable, Sendable {
-    public let accessToken: String
-    public let refreshToken: String?
-    public let expiresIn: Int
-    public let tokenType: String
-    public let acquiredAt: Date
-
-    public init(accessToken: String, refreshToken: String?, expiresIn: Int, tokenType: String, acquiredAt: Date = Date()) {
-        self.accessToken = accessToken
-        self.refreshToken = refreshToken
-        self.expiresIn = expiresIn
-        self.tokenType = tokenType
-        self.acquiredAt = acquiredAt
-    }
-
-    public var expiresAt: Date {
-        acquiredAt.addingTimeInterval(TimeInterval(expiresIn))
-    }
-
-    public var isExpired: Bool {
-        Date() >= expiresAt
-    }
-}
-
 public enum XPostingError: Error, LocalizedError {
     case missingConfiguration(String)
     case invalidResponse
     case unauthorized
     case network(String)
     case service(String)
-    case oauthStateMismatch
 
     public var errorDescription: String? {
         switch self {
@@ -189,7 +150,6 @@ public enum XPostingError: Error, LocalizedError {
         case .unauthorized: return "Authentication failed. Please reconnect your account."
         case .network(let message): return "Network error: \(message)"
         case .service(let message): return message
-        case .oauthStateMismatch: return "OAuth callback state did not match the request."
         }
     }
 }

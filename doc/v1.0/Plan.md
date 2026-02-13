@@ -10,7 +10,7 @@
 - SwiftUI + MenuBarExtra for UI
 - AppKit utilities (clipboard)
 - URLSession for network calls
-- Keychain for X OAuth token storage
+- Keychain for X OAuth 1.0a credential storage
 - UserDefaults-backed settings storage for DeepSeek configuration and API key
 - Swift Package Manager build and test
 
@@ -19,7 +19,7 @@
 - `AppSettings`: DeepSeek and X configuration, default polish options.
 - `PolishRequest` + `PolishResponse`.
 - `PostSegment` + `PublishPlan` + `PublishResult`.
-- `OAuthConfiguration` + `OAuthToken`.
+- `XCredentials` (OAuth 1.0a API key + access token pairs).
 
 ## UI / UX Plan
 - Menubar popover for quick draft + polish/publish/copy.
@@ -39,7 +39,7 @@
 - Local persistence and clipboard flow.
 
 3. X integration
-- OAuth PKCE flow.
+- OAuth 1.0a signing (user pastes 4 keys from X Developer Portal).
 - Publish single post/thread with optional single image.
 - Failure handling and status reporting.
 
@@ -56,4 +56,4 @@
 
 ## Notes
 - Character counting is a configurable approximation and can be swapped if exact rules change.
-- OAuth callback can be handled either by app URL callback or manual callback URL completion in MVP.
+- OAuth 1.0a uses HMAC-SHA1 request signing; tokens never expire and no browser redirect is needed.

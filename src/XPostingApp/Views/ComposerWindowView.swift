@@ -156,10 +156,5 @@ struct ComposerWindowView: View {
         .onAppear {
             viewModel.bootstrapIfNeeded()
         }
-        .onOpenURL { url in
-            Task {
-                await viewModel.handleOAuthCallback(url)
-            }
-        }
     }
 }
