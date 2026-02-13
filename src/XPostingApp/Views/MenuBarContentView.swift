@@ -156,7 +156,18 @@ struct MenuBarContentView: View {
     }
 
     private func openImagePanel() {
+        let vm = viewModel
+        // Prevent the MenuBarExtra's underlying NSPanel (and all other windows)
+        // from hiding when the NSOpenPanel steals focus. Without this the
+        // MenuBarExtra panel hides on deactivation which tears down this view
+        // and dismisses the open panel.
+        let savedStates = NSApp.windows.map { ($0, $0.hidesOnDeactivate) }
+        for window in NSApp.windows {
+            window.hidesOnDeactivate = false
+        }
+
         NSApp.activate(ignoringOtherApps: true)
+
         DispatchQueue.main.async {
             let panel = NSOpenPanel()
             panel.allowedContentTypes = [.image]
@@ -164,13 +175,19 @@ struct MenuBarContentView: View {
             panel.canChooseDirectories = false
             panel.canChooseFiles = true
             panel.hidesOnDeactivate = false
-            panel.level = .normal
-            panel.directoryURL = viewModel.preferredImageDirectoryURL()
-            // Run outside the menubar click event so folder changes don't collapse the panel.
+            panel.level = .modalPanel
+            panel.directoryURL = vm.preferredImageDirectoryURL()
+
             let response = panel.runModal()
+
+            // Restore original hidesOnDeactivate states.
+            for (window, state) in savedStates {
+                window.hidesOnDeactivate = state
+            }
+
             guard response == .OK, let url = panel.url ?? panel.urls.first else { return }
-            viewModel.rememberImageDirectory(from: url)
-            viewModel.attachImage(at: url)
+            vm.rememberImageDirectory(from: url)
+            vm.attachImage(at: url)
         }
     }
 
