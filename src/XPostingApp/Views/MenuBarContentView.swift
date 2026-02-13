@@ -10,8 +10,21 @@ struct MenuBarContentView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Quick Draft")
-                .font(.headline)
+            HStack {
+                Text("Quick Draft")
+                    .font(.headline)
+
+                Spacer()
+
+                Button {
+                    openHomepage()
+                } label: {
+                    Label("Homepage", systemImage: "house")
+                }
+                .buttonStyle(.bordered)
+                .font(.caption)
+                .controlSize(.small)
+            }
 
             TextEditor(text: $viewModel.draftText)
                 .font(.body)
@@ -89,14 +102,6 @@ struct MenuBarContentView: View {
                 }
                 .buttonStyle(.bordered)
 
-                Button {
-                    guard let url = URL(string: "https://x.com/_feng_xie") else { return }
-                    NSWorkspace.shared.open(url)
-                } label: {
-                    Label("Homepage", systemImage: "house")
-                }
-                .buttonStyle(.bordered)
-
                 Spacer()
 
                 Button(role: .destructive) {
@@ -140,5 +145,10 @@ struct MenuBarContentView: View {
                 viewModel.attachImage(at: url)
             }
         }
+    }
+
+    private func openHomepage() {
+        guard let url = URL(string: "https://x.com/_feng_xie") else { return }
+        NSWorkspace.shared.open(url)
     }
 }
