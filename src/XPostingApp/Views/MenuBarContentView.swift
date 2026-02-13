@@ -160,10 +160,11 @@ struct MenuBarContentView: View {
         panel.allowedContentTypes = [.image]
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
-        panel.level = .popUpMenu
-        // Use runModal to prevent the menubar panel from dismissing on interaction.
+        panel.canChooseFiles = true
+        NSApp.activate(ignoringOtherApps: true)
+        // Use runModal so selection completes even if the menubar panel dismisses.
         let response = panel.runModal()
-        guard response == .OK, let url = panel.url else { return }
+        guard response == .OK, let url = panel.url ?? panel.urls.first else { return }
         viewModel.attachImage(at: url)
     }
 

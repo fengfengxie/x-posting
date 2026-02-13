@@ -21,9 +21,6 @@
 - [x] Wire `script/build.sh` and `script/test.sh` to real commands.
 - [x] Update v1.0 docs from templates to current MVP spec.
 
-## Known Issues
-- Menubar `Attach Image`: after selecting a file in the Finder open panel, both the open panel and menubar close, and the image is not attached when reopening the menubar. Fix should prioritize completing the image attach even if the menubar panel dismisses, rather than keeping the panel open.
-
 ## Notes
 - Date: 2026-02-13
 - Current publish integration includes single image upload path and thread posting logic.
@@ -48,3 +45,4 @@
 - UX polish: Publish success feedback now includes an inline `Open Post` hyperlink action using the returned post ID, enabling one-click verification after posting.
 - Docs: Rewrote README for public repo readiness (motivation, features, getting started, project structure, tech stack). Updated GitHub repo description.
 - Bugfix: Image attach open panel now uses `runModal()` instead of async `begin()`, preventing the menubar panel from dismissing when the user interacts with the file picker. Previously, clicking a file in the open panel would steal focus from the menubar, causing both the panel and the open dialog to close before the selection completed.
+- Bugfix: Menubar image attach now activates the app and uses a standard-level `NSOpenPanel` so file selection completes even if the menubar panel closes.
