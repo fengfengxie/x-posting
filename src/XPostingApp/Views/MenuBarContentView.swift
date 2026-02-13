@@ -1,11 +1,13 @@
 import AppKit
 import SwiftUI
+import UniformTypeIdentifiers
 import XPostingCore
 
 struct MenuBarContentView: View {
     @ObservedObject var viewModel: ComposerViewModel
 
     @Environment(\.openWindow) private var openWindow
+    @State private var isImporterPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -46,6 +48,34 @@ struct MenuBarContentView: View {
                 Button("Copy") {
                     viewModel.copyDraftToClipboard()
                 }
+            }
+
+            HStack {
+                Button {
+                    isImporterPresented = true
+                } label: {
+                    Label("Attach Image", systemImage: "paperclip")
+                }
+                .buttonStyle(.bordered)
+
+                if viewModel.imagePath != nil {
+                    Button("Remove") {
+                        viewModel.removeImage()
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                Spacer()
+            }
+            .font(.caption)
+            .controlSize(.small)
+
+            if let imagePath = viewModel.imagePath {
+                Text("Attached: \(URL(fileURLWithPath: imagePath).lastPathComponent)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
             }
 
             HStack {
@@ -91,6 +121,21 @@ struct MenuBarContentView: View {
         }
         .padding(12)
         .frame(width: 360)
+        .fileImporter(
+            isPresented: $isImporterPresented,
+            allowedContentTypes: [.image],
+            allowsMultipleSelection: false
+        ) { result in
+            switch result {
+            case .success(let urls):
+                if let url = urls.first {
+                    viewModel.attachImage(at: url)
+                }
+            case .failure(let error):
+                viewModel.statusMessage = "Image selection failed: \(error.localizedDescription)"
+                viewModel.statusIsError = true
+            }
+        }
         .onAppear {
             viewModel.bootstrapIfNeeded()
         }
