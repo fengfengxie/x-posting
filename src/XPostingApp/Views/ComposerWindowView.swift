@@ -8,8 +8,6 @@ struct ComposerWindowView: View {
 
     @Environment(\.openWindow) private var openWindow
 
-    @State private var isImporterPresented = false
-
     var body: some View {
         HStack(spacing: 16) {
             VStack(alignment: .leading, spacing: 12) {
@@ -72,7 +70,7 @@ struct ComposerWindowView: View {
 
                 HStack {
                     Button("Attach Image") {
-                        isImporterPresented = true
+                        openImagePanel()
                     }
 
                     if viewModel.imagePath != nil {
@@ -138,23 +136,21 @@ struct ComposerWindowView: View {
             .frame(width: 280, alignment: .topLeading)
         }
         .padding(18)
-        .fileImporter(
-            isPresented: $isImporterPresented,
-            allowedContentTypes: [.image],
-            allowsMultipleSelection: false
-        ) { result in
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    viewModel.attachImage(at: url)
-                }
-            case .failure(let error):
-                viewModel.statusMessage = "Image selection failed: \(error.localizedDescription)"
-                viewModel.statusIsError = true
-            }
-        }
         .onAppear {
             viewModel.bootstrapIfNeeded()
+        }
+    }
+
+    private func openImagePanel() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            Task { @MainActor in
+                viewModel.attachImage(at: url)
+            }
         }
     }
 }

@@ -7,7 +7,6 @@ struct MenuBarContentView: View {
     @ObservedObject var viewModel: ComposerViewModel
 
     @Environment(\.openWindow) private var openWindow
-    @State private var isImporterPresented = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -52,7 +51,7 @@ struct MenuBarContentView: View {
 
             HStack {
                 Button {
-                    presentImageImporter()
+                    openImagePanel()
                 } label: {
                     Label("Attach Image", systemImage: "paperclip")
                 }
@@ -121,33 +120,22 @@ struct MenuBarContentView: View {
         }
         .padding(12)
         .frame(width: 360)
-        .fileImporter(
-            isPresented: $isImporterPresented,
-            allowedContentTypes: [.image],
-            allowsMultipleSelection: false
-        ) { result in
-            isImporterPresented = false
-            switch result {
-            case .success(let urls):
-                if let url = urls.first {
-                    viewModel.attachImage(at: url)
-                }
-            case .failure(let error):
-                viewModel.statusMessage = "Image selection failed: \(error.localizedDescription)"
-                viewModel.statusIsError = true
-            }
-        }
         .onAppear {
             viewModel.bootstrapIfNeeded()
         }
     }
 
-    private func presentImageImporter() {
-        // In MenuBarExtra windows the importer binding can remain true after dismissal.
-        // Force a false -> true transition so repeated clicks always reopen Finder.
-        isImporterPresented = false
-        DispatchQueue.main.async {
-            isImporterPresented = true
+    private func openImagePanel() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.image]
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.level = .popUpMenu
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            Task { @MainActor in
+                viewModel.attachImage(at: url)
+            }
         }
     }
 }

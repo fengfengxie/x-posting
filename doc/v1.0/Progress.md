@@ -32,3 +32,4 @@
 - UI polish: Menubar quick draft editor now applies inner padding so typed text no longer visually collides with the editor border.
 - UX: Menubar quick draft now supports direct image attach/remove operations with attached-file visibility, so users can publish image posts without opening the full composer.
 - Bugfix: Menubar `Attach Image` now reliably reopens Finder on repeated clicks by forcing a fresh importer presentation state transition.
+- Bugfix: Replaced SwiftUI `.fileImporter` with direct `NSOpenPanel` for image attach in both menubar and composer views, fixing repeated-click unresponsiveness in MenuBarExtra context. Image data is now copied into app support on attach, resolving security-scoped URL access failures during publish.

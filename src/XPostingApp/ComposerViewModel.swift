@@ -184,18 +184,39 @@ final class ComposerViewModel: ObservableObject {
     }
 
     func attachImage(at url: URL) {
-        imagePath = url.path
-        Task {
-            do {
-                _ = try await draftStore.updateImagePath(url.path)
-                setStatus("Image attached.", isError: false)
-            } catch {
-                setStatus("Failed to save image selection: \(error.localizedDescription)", isError: true)
+        do {
+            // Security-scoped access for fileImporter URLs; no-op for NSOpenPanel URLs.
+            let scoped = url.startAccessingSecurityScopedResource()
+            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
+
+            // Copy image into app support so the data is always readable later.
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            let dir = appSupport.appendingPathComponent("XPosting", isDirectory: true)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            let dest = dir.appendingPathComponent("attached_image_\(url.lastPathComponent)")
+            if FileManager.default.fileExists(atPath: dest.path) {
+                try FileManager.default.removeItem(at: dest)
             }
+            try FileManager.default.copyItem(at: url, to: dest)
+
+            imagePath = dest.path
+            Task {
+                do {
+                    _ = try await draftStore.updateImagePath(dest.path)
+                    setStatus("Image attached.", isError: false)
+                } catch {
+                    setStatus("Failed to save image selection: \(error.localizedDescription)", isError: true)
+                }
+            }
+        } catch {
+            setStatus("Failed to attach image: \(error.localizedDescription)", isError: true)
         }
     }
 
     func removeImage() {
+        if let imagePath {
+            try? FileManager.default.removeItem(atPath: imagePath)
+        }
         imagePath = nil
         Task {
             do {
