@@ -89,6 +89,14 @@ struct MenuBarContentView: View {
                 }
                 .buttonStyle(.bordered)
 
+                Button {
+                    guard let url = URL(string: "https://x.com/_feng_xie") else { return }
+                    NSWorkspace.shared.open(url)
+                } label: {
+                    Label("Homepage", systemImage: "house")
+                }
+                .buttonStyle(.bordered)
+
                 Spacer()
 
                 Button(role: .destructive) {
