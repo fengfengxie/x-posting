@@ -22,6 +22,7 @@ final class ComposerViewModel: ObservableObject {
 
     @Published var statusMessage: String?
     @Published var statusIsError: Bool = false
+    @Published var canRevertPolish: Bool = false
 
     @Published var isPolishing: Bool = false
     @Published var isPublishing: Bool = false
@@ -37,6 +38,7 @@ final class ComposerViewModel: ObservableObject {
 
     private var hasBootstrapped = false
     private var hasLoadedXCredentials = false
+    private var lastPrePolishText: String?
 
     init(
         draftStore: DraftStore,
@@ -122,6 +124,7 @@ final class ComposerViewModel: ObservableObject {
             return
         }
 
+        let originalText = draftText
         isPolishing = true
         Task {
             do {
@@ -134,11 +137,28 @@ final class ComposerViewModel: ObservableObject {
                 draftText = response.polishedText
                 _ = try await draftStore.updateText(draftText)
                 refreshAnalysis()
-                setStatus("Polished successfully.", isError: false)
+                lastPrePolishText = originalText
+                setStatus("Polished successfully.", isError: false, canRevertPolish: true)
             } catch {
                 setStatus("Polish failed: \(error.localizedDescription)", isError: true)
             }
             isPolishing = false
+        }
+    }
+
+    func revertLastPolish() {
+        guard let originalText = lastPrePolishText else { return }
+
+        draftText = originalText
+        refreshAnalysis()
+
+        Task {
+            do {
+                _ = try await draftStore.updateText(originalText)
+                setStatus("Reverted to pre-polish text.", isError: false)
+            } catch {
+                setStatus("Reverted locally, but failed to save draft: \(error.localizedDescription)", isError: true)
+            }
         }
     }
 
@@ -323,8 +343,12 @@ final class ComposerViewModel: ObservableObject {
         return try Data(contentsOf: url)
     }
 
-    private func setStatus(_ message: String, isError: Bool) {
+    private func setStatus(_ message: String, isError: Bool, canRevertPolish: Bool = false) {
         statusMessage = message
         statusIsError = isError
+        self.canRevertPolish = canRevertPolish
+        if !canRevertPolish {
+            lastPrePolishText = nil
+        }
     }
 }

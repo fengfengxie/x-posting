@@ -115,10 +115,22 @@ struct MenuBarContentView: View {
             .controlSize(.small)
 
             if let message = viewModel.statusMessage {
-                Text(message)
-                    .font(.caption)
-                    .foregroundStyle(viewModel.statusIsError ? Color.red : Color.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(viewModel.statusIsError ? Color.red : Color.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    if viewModel.canRevertPolish {
+                        Button("Revert") {
+                            viewModel.revertLastPolish()
+                        }
+                        .buttonStyle(.plain)
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                        .underline()
+                    }
+                }
             }
 
             if viewModel.isPolishing || viewModel.isPublishing {
