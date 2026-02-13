@@ -13,6 +13,8 @@ struct MenuBarContentView: View {
                 .font(.headline)
 
             TextEditor(text: $viewModel.draftText)
+                .font(.body)
+                .padding(6)
                 .frame(minHeight: 110, maxHeight: 140)
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
@@ -47,16 +49,33 @@ struct MenuBarContentView: View {
             }
 
             HStack {
-                Button("Open Composer") {
+                Button {
+                    NSApp.activate(ignoringOtherApps: true)
                     openWindow(id: "composer")
+                } label: {
+                    Label("Open Composer", systemImage: "square.and.pencil")
                 }
+                .buttonStyle(.bordered)
 
-                Button("Settings") {
+                Button {
+                    NSApp.activate(ignoringOtherApps: true)
                     openWindow(id: "settings")
+                } label: {
+                    Label("Settings", systemImage: "gearshape")
                 }
+                .buttonStyle(.bordered)
+
+                Spacer()
+
+                Button(role: .destructive) {
+                    NSApp.terminate(nil)
+                } label: {
+                    Label("Quit", systemImage: "power")
+                }
+                .buttonStyle(.bordered)
             }
-            .buttonStyle(.borderless)
             .font(.caption)
+            .controlSize(.small)
 
             if let message = viewModel.statusMessage {
                 Text(message)
