@@ -30,18 +30,17 @@ X Posting is a distraction-resistant macOS menubar app for drafting, polishing, 
 - DeepSeek API integration with user-provided API key.
 - Single polish mode: minimal edits for typos/grammar/syntax while preserving authenticity.
 - X OAuth 1.0a account connection (user-provided API keys).
-- Publish via X API with text and one image.
+- Publish via X API with text.
 - Character limit analysis and auto thread split.
 - On publish failure: show error, keep draft content, offer copy action.
 
 ## Success Metrics
 - Draft-to-publish flow can be completed without opening X app.
-- 100% of failed publishes preserve draft text and image selection.
+- 100% of failed publishes preserve draft text.
 - Character limit preview matches publish segments from app output.
 
 ## Risks
 - X API access policy/permission changes.
-- Media upload compatibility differences across API versions.
 - Weighted character counting may drift from future X rules.
 
 ## Open Questions

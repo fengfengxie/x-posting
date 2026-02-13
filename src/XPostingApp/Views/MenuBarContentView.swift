@@ -1,6 +1,5 @@
 import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 import XPostingCore
 
 struct MenuBarContentView: View {
@@ -67,31 +66,16 @@ struct MenuBarContentView: View {
                 .disabled(viewModel.isPolishing || viewModel.isPublishing)
 
                 Button {
-                    openImagePanel()
+                    viewModel.showAttachImagePlaceholder()
                 } label: {
                     Label("Attach Image", systemImage: "paperclip")
                 }
                 .buttonStyle(.bordered)
 
-                if viewModel.imagePath != nil {
-                    Button("Remove") {
-                        viewModel.removeImage()
-                    }
-                    .buttonStyle(.bordered)
-                }
-
                 Spacer()
             }
             .font(.caption)
             .controlSize(.small)
-
-            if let imagePath = viewModel.imagePath {
-                Text("Attached: \(URL(fileURLWithPath: imagePath).lastPathComponent)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                    .truncationMode(.middle)
-            }
 
             HStack {
                 Button {
@@ -152,42 +136,6 @@ struct MenuBarContentView: View {
         .frame(width: 360)
         .onAppear {
             viewModel.bootstrapIfNeeded()
-        }
-    }
-
-    private func openImagePanel() {
-        let vm = viewModel
-        // Prevent the MenuBarExtra's underlying NSPanel (and all other windows)
-        // from hiding when the NSOpenPanel steals focus. Without this the
-        // MenuBarExtra panel hides on deactivation which tears down this view
-        // and dismisses the open panel.
-        let savedStates = NSApp.windows.map { ($0, $0.hidesOnDeactivate) }
-        for window in NSApp.windows {
-            window.hidesOnDeactivate = false
-        }
-
-        NSApp.activate(ignoringOtherApps: true)
-
-        DispatchQueue.main.async {
-            let panel = NSOpenPanel()
-            panel.allowedContentTypes = [.image]
-            panel.allowsMultipleSelection = false
-            panel.canChooseDirectories = false
-            panel.canChooseFiles = true
-            panel.hidesOnDeactivate = false
-            panel.level = .modalPanel
-            panel.directoryURL = vm.preferredImageDirectoryURL()
-
-            let response = panel.runModal()
-
-            // Restore original hidesOnDeactivate states.
-            for (window, state) in savedStates {
-                window.hidesOnDeactivate = state
-            }
-
-            guard response == .OK, let url = panel.url ?? panel.urls.first else { return }
-            vm.rememberImageDirectory(from: url)
-            vm.attachImage(at: url)
         }
     }
 

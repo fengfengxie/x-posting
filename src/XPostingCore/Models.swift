@@ -3,20 +3,17 @@ import Foundation
 public struct Draft: Identifiable, Codable, Equatable, Sendable {
     public let id: UUID
     public var text: String
-    public var imagePath: String?
     public let createdAt: Date
     public var updatedAt: Date
 
     public init(
         id: UUID = UUID(),
         text: String = "",
-        imagePath: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
         self.id = id
         self.text = text
-        self.imagePath = imagePath
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -86,11 +83,9 @@ public struct PostSegment: Identifiable, Equatable, Sendable {
 
 public struct PublishPlan: Sendable {
     public let segments: [PostSegment]
-    public let imageData: Data?
 
-    public init(segments: [PostSegment], imageData: Data? = nil) {
+    public init(segments: [PostSegment]) {
         self.segments = segments
-        self.imageData = imageData
     }
 }
 

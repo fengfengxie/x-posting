@@ -15,7 +15,7 @@
 - Swift Package Manager build and test
 
 ## Data Model Plan
-- `Draft`: text, image path, timestamps.
+- `Draft`: text, timestamps.
 - `AppSettings`: DeepSeek and X configuration.
 - `PolishRequest` + `PolishResponse`.
 - `PostSegment` + `PublishPlan` + `PublishResult`.
@@ -23,7 +23,7 @@
 
 ## UI / UX Plan
 - Menubar popover for quick draft + polish/publish/copy.
-- Menubar includes image attach/remove, live count, and publish controls without opening a second compose surface.
+- Menubar includes draft, live count, polish, and publish controls without opening a second compose surface.
 - Settings page for DeepSeek and X API credentials.
 - Failure UX: show error banner and keep content unchanged.
 
@@ -40,7 +40,7 @@
 
 3. X integration
 - OAuth 1.0a signing (user pastes 4 keys from X Developer Portal).
-- Publish single post/thread with optional single image.
+- Publish single post/thread with text only.
 - Failure handling and status reporting.
 
 4. Hardening

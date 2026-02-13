@@ -4,7 +4,6 @@ import XPostingCore
 @MainActor
 final class ComposerViewModel: ObservableObject {
     @Published var draftText: String = ""
-    @Published var imagePath: String?
 
     @Published var weightedCharacterCount: Int = 0
     @Published var estimatedPostCount: Int = 1
@@ -40,7 +39,6 @@ final class ComposerViewModel: ObservableObject {
     private var hasBootstrapped = false
     private var hasLoadedXCredentials = false
     private var lastPrePolishText: String?
-    private let lastImageDirectoryDefaultsKey = "xposting.lastImageDirectoryPath"
 
     init(
         draftStore: DraftStore,
@@ -174,12 +172,10 @@ final class ComposerViewModel: ObservableObject {
         Task {
             do {
                 let segments = limitService.split(draftText)
-                let imageData = try loadImageDataIfNeeded()
-                let result = try await publishService.publish(PublishPlan(segments: segments, imageData: imageData))
+                let result = try await publishService.publish(PublishPlan(segments: segments))
 
                 if result.success {
                     draftText = ""
-                    imagePath = nil
                     try await draftStore.clear()
                     refreshAnalysis()
                     let postURL = result.postIDs.first.map { URL(string: "https://x.com/i/web/status/\($0)")! }
@@ -194,60 +190,8 @@ final class ComposerViewModel: ObservableObject {
         }
     }
 
-    func attachImage(at url: URL) {
-        do {
-            // Security-scoped access for fileImporter URLs; no-op for NSOpenPanel URLs.
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-
-            // Copy image into app support so the data is always readable later.
-            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-            let dir = appSupport.appendingPathComponent("XPosting", isDirectory: true)
-            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
-            let dest = dir.appendingPathComponent("attached_image_\(url.lastPathComponent)")
-            if FileManager.default.fileExists(atPath: dest.path) {
-                try FileManager.default.removeItem(at: dest)
-            }
-            try FileManager.default.copyItem(at: url, to: dest)
-
-            imagePath = dest.path
-            Task {
-                do {
-                    _ = try await draftStore.updateImagePath(dest.path)
-                    setStatus("Image attached.", isError: false)
-                } catch {
-                    setStatus("Failed to save image selection: \(error.localizedDescription)", isError: true)
-                }
-            }
-        } catch {
-            setStatus("Failed to attach image: \(error.localizedDescription)", isError: true)
-        }
-    }
-
-    func preferredImageDirectoryURL() -> URL? {
-        guard let path = UserDefaults.standard.string(forKey: lastImageDirectoryDefaultsKey), !path.isEmpty else {
-            return nil
-        }
-        return URL(fileURLWithPath: path, isDirectory: true)
-    }
-
-    func rememberImageDirectory(from selectedFileURL: URL) {
-        let directoryURL = selectedFileURL.deletingLastPathComponent()
-        UserDefaults.standard.set(directoryURL.path, forKey: lastImageDirectoryDefaultsKey)
-    }
-
-    func removeImage() {
-        if let imagePath {
-            try? FileManager.default.removeItem(atPath: imagePath)
-        }
-        imagePath = nil
-        Task {
-            do {
-                _ = try await draftStore.updateImagePath(nil)
-            } catch {
-                setStatus("Failed to remove image: \(error.localizedDescription)", isError: true)
-            }
-        }
+    func showAttachImagePlaceholder() {
+        setStatus("Feature to be implemented.", isError: false)
     }
 
     func saveSettings() {
@@ -331,7 +275,6 @@ final class ComposerViewModel: ObservableObject {
         let settings = await settingsStore.load()
 
         draftText = draft.text
-        imagePath = draft.imagePath
 
         deepSeekBaseURL = settings.deepSeekBaseURL.absoluteString
         deepSeekModel = settings.deepSeekModel
@@ -350,12 +293,6 @@ final class ComposerViewModel: ObservableObject {
             deepSeekAPIKey: deepSeekAPIKey
         )
         try await settingsStore.save(settings)
-    }
-
-    private func loadImageDataIfNeeded() throws -> Data? {
-        guard let imagePath else { return nil }
-        let url = URL(fileURLWithPath: imagePath)
-        return try Data(contentsOf: url)
     }
 
     private func setStatus(_ message: String, isError: Bool, canRevertPolish: Bool = false, publishedPostURL: URL? = nil) {

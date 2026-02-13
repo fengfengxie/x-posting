@@ -39,14 +39,6 @@ public actor DraftStore {
         return draft
     }
 
-    public func updateImagePath(_ imagePath: String?) throws -> Draft {
-        var draft = load()
-        draft.imagePath = imagePath
-        draft.updatedAt = Date()
-        try save(draft)
-        return draft
-    }
-
     public func clear() throws {
         try? FileManager.default.removeItem(at: fileURL)
     }

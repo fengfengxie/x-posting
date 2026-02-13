@@ -9,7 +9,7 @@
 - [x] Implement character limit analysis and thread segmentation preview.
 - [x] Implement DeepSeek polish service with tone presets.
 - [x] Add output language options for polishing (`auto` / `en` / `cn`).
-- [x] Add clipboard and single-image draft attachment flow.
+- [x] Add clipboard draft workflow (image attachment support later de-scoped).
 
 ## Phase 3: X Integration (Completed)
 - [x] Implement OAuth 1.0a signing (HMAC-SHA1) and credential storage.
@@ -23,7 +23,8 @@
 
 ## Notes
 - Date: 2026-02-13
-- Current publish integration includes single image upload path and thread posting logic.
+- Scope update: Attach-image workflow was intentionally removed from active functionality. Menubar now keeps an `Attach Image` placeholder button that shows `Feature to be implemented.` in status feedback.
+- Current publish integration uses text-only thread posting logic.
 - Migrated from OAuth 2.0 PKCE to OAuth 1.0a: user pastes 4 keys from X Developer Portal, no browser redirect needed, tokens never expire.
 - Bugfix: DeepSeek API key is now directly editable/pastable in settings and saved in app settings (no Keychain fetch path for DeepSeek key).
 - Bugfix: X API settings inputs now use stable local edit state to prevent typing loss in Settings window, and settings window explicitly activates app focus on appear.
