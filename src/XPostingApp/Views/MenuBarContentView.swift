@@ -45,8 +45,10 @@ struct MenuBarContentView: View {
             }
 
             HStack {
-                Button("Fix Text") {
+                Button {
                     viewModel.polishDraft()
+                } label: {
+                    Label("Fix Text", systemImage: "wand.and.stars")
                 }
                 .buttonStyle(.bordered)
                 .disabled(viewModel.isPolishing || viewModel.isPublishing)
