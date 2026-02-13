@@ -10,11 +10,6 @@ struct XPostingApp: App {
         }
         .menuBarExtraStyle(.window)
 
-        WindowGroup(id: "composer") {
-            ComposerWindowView(viewModel: viewModel)
-        }
-        .defaultSize(width: 980, height: 640)
-
         Window("x-posting Settings", id: "settings") {
             SettingsView(viewModel: viewModel)
         }

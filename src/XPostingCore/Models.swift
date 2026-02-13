@@ -1,25 +1,5 @@
 import Foundation
 
-public enum PolishPreset: String, Codable, CaseIterable, Sendable {
-    case concise
-    case professional
-    case casual
-}
-
-public enum TargetOutputLanguage: String, Codable, CaseIterable, Sendable {
-    case auto
-    case en
-    case cn
-
-    public var displayName: String {
-        switch self {
-        case .auto: return "Auto"
-        case .en: return "English"
-        case .cn: return "Chinese"
-        }
-    }
-}
-
 public struct Draft: Identifiable, Codable, Equatable, Sendable {
     public let id: UUID
     public var text: String
@@ -60,33 +40,23 @@ public struct AppSettings: Codable, Sendable {
     public var deepSeekBaseURL: URL
     public var deepSeekModel: String
     public var deepSeekAPIKey: String
-    public var defaultPreset: PolishPreset
-    public var defaultOutputLanguage: TargetOutputLanguage
 
     public init(
         deepSeekBaseURL: URL = URL(string: "https://api.deepseek.com")!,
         deepSeekModel: String = "deepseek-chat",
-        deepSeekAPIKey: String = "",
-        defaultPreset: PolishPreset = .concise,
-        defaultOutputLanguage: TargetOutputLanguage = .auto
+        deepSeekAPIKey: String = ""
     ) {
         self.deepSeekBaseURL = deepSeekBaseURL
         self.deepSeekModel = deepSeekModel
         self.deepSeekAPIKey = deepSeekAPIKey
-        self.defaultPreset = defaultPreset
-        self.defaultOutputLanguage = defaultOutputLanguage
     }
 }
 
 public struct PolishRequest: Sendable {
     public let originalText: String
-    public let preset: PolishPreset
-    public let outputLanguage: TargetOutputLanguage
 
-    public init(originalText: String, preset: PolishPreset, outputLanguage: TargetOutputLanguage) {
+    public init(originalText: String) {
         self.originalText = originalText
-        self.preset = preset
-        self.outputLanguage = outputLanguage
     }
 }
 

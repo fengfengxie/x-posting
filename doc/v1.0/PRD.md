@@ -20,17 +20,15 @@ X Posting is a distraction-resistant macOS menubar app for drafting, polishing, 
 
 ## User Stories
 - As a user, I can draft quickly from the menubar.
-- As a user, I can polish language with selectable tone.
-- As a user, I can choose target output language for polishing: auto / English / Chinese.
+- As a user, I can polish language with minimal corrections that preserve my original voice.
 - As a user, I can preview thread splits before publishing.
 - As a user, I can publish directly to X and keep draft content if publish fails.
 
 ## Requirements
-- macOS 14+ menubar app with optional full composer window.
+- macOS 14+ menubar app with all core actions available directly in the menubar panel.
 - Local draft persistence.
 - DeepSeek API integration with user-provided API key.
-- Polish presets: concise / professional / casual.
-- Output language option: auto / en / cn.
+- Single polish mode: minimal edits for typos/grammar/syntax while preserving authenticity.
 - X OAuth 1.0a account connection (user-provided API keys).
 - Publish via X API with text and one image.
 - Character limit analysis and auto thread split.

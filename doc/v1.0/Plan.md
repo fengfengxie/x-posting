@@ -16,14 +16,14 @@
 
 ## Data Model Plan
 - `Draft`: text, image path, timestamps.
-- `AppSettings`: DeepSeek and X configuration, default polish options.
+- `AppSettings`: DeepSeek and X configuration.
 - `PolishRequest` + `PolishResponse`.
 - `PostSegment` + `PublishPlan` + `PublishResult`.
 - `XCredentials` (OAuth 1.0a API key + access token pairs).
 
 ## UI / UX Plan
 - Menubar popover for quick draft + polish/publish/copy.
-- Full composer window for long edits, thread preview, and image attach.
+- Menubar includes image attach/remove, live count, and publish controls without opening a second compose surface.
 - Settings page for DeepSeek and X API credentials.
 - Failure UX: show error banner and keep content unchanged.
 
@@ -31,11 +31,11 @@
 1. Foundation
 - Package scaffolding.
 - Core models and stores.
-- Menubar + composer skeleton.
+- Menubar-first app skeleton.
 
 2. Core workflow
 - Character limit analysis and split preview.
-- DeepSeek polish with tone and output language controls.
+- DeepSeek polish with single minimal-edit behavior.
 - Local persistence and clipboard flow.
 
 3. X integration

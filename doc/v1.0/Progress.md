@@ -33,3 +33,5 @@
 - UX: Menubar quick draft now supports direct image attach/remove operations with attached-file visibility, so users can publish image posts without opening the full composer.
 - Bugfix: Menubar `Attach Image` now reliably reopens Finder on repeated clicks by forcing a fresh importer presentation state transition.
 - Bugfix: Replaced SwiftUI `.fileImporter` with direct `NSOpenPanel` for image attach in both menubar and composer views, fixing repeated-click unresponsiveness in MenuBarExtra context. Image data is now copied into app support on attach, resolving security-scoped URL access failures during publish.
+- UX refactor: Removed the independent composer window and removed `Open Composer`; compose/polish/publish/image actions now stay menubar-first.
+- Polish simplification: Removed tone/output-mode branching and switched to a single minimal-edit prompt that preserves authenticity and only fixes necessary typos/grammar/syntax.

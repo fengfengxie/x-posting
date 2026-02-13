@@ -7,9 +7,6 @@ final class ComposerViewModel: ObservableObject {
     @Published var draftText: String = ""
     @Published var imagePath: String?
 
-    @Published var selectedPreset: PolishPreset = .concise
-    @Published var selectedOutputLanguage: TargetOutputLanguage = .auto
-
     @Published var weightedCharacterCount: Int = 0
     @Published var estimatedPostCount: Int = 1
     @Published var segments: [PostSegment] = []
@@ -130,9 +127,7 @@ final class ComposerViewModel: ObservableObject {
             do {
                 let response = try await polishService.polish(
                     PolishRequest(
-                        originalText: draftText,
-                        preset: selectedPreset,
-                        outputLanguage: selectedOutputLanguage
+                        originalText: draftText
                     )
                 )
 
@@ -289,9 +284,6 @@ final class ComposerViewModel: ObservableObject {
         draftText = draft.text
         imagePath = draft.imagePath
 
-        selectedPreset = settings.defaultPreset
-        selectedOutputLanguage = settings.defaultOutputLanguage
-
         deepSeekBaseURL = settings.deepSeekBaseURL.absoluteString
         deepSeekModel = settings.deepSeekModel
         deepSeekAPIKey = settings.deepSeekAPIKey
@@ -318,9 +310,7 @@ final class ComposerViewModel: ObservableObject {
         let settings = AppSettings(
             deepSeekBaseURL: baseURL,
             deepSeekModel: deepSeekModel,
-            deepSeekAPIKey: deepSeekAPIKey,
-            defaultPreset: selectedPreset,
-            defaultOutputLanguage: selectedOutputLanguage
+            deepSeekAPIKey: deepSeekAPIKey
         )
         try await settingsStore.save(settings)
     }

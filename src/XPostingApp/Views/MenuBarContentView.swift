@@ -80,14 +80,6 @@ struct MenuBarContentView: View {
             HStack {
                 Button {
                     NSApp.activate(ignoringOtherApps: true)
-                    openWindow(id: "composer")
-                } label: {
-                    Label("Open Composer", systemImage: "square.and.pencil")
-                }
-                .buttonStyle(.bordered)
-
-                Button {
-                    NSApp.activate(ignoringOtherApps: true)
                     openWindow(id: "settings")
                 } label: {
                     Label("Settings", systemImage: "gearshape")

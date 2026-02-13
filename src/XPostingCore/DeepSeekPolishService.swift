@@ -32,7 +32,7 @@ public actor DeepSeekPolishService {
         let payload = DeepSeekChatRequest(
             model: settings.deepSeekModel,
             messages: [
-                DeepSeekChatMessage(role: "system", content: systemPrompt(for: request)),
+                DeepSeekChatMessage(role: "system", content: systemPrompt()),
                 DeepSeekChatMessage(role: "user", content: request.originalText)
             ],
             temperature: 0.3
@@ -59,28 +59,8 @@ public actor DeepSeekPolishService {
         return PolishResponse(polishedText: content, estimatedPostCount: estimate)
     }
 
-    private func systemPrompt(for request: PolishRequest) -> String {
-        let toneInstruction: String
-        switch request.preset {
-        case .concise:
-            toneInstruction = "Keep it concise and direct."
-        case .professional:
-            toneInstruction = "Use a professional and clear tone."
-        case .casual:
-            toneInstruction = "Use a natural, casual tone."
-        }
-
-        let languageInstruction: String
-        switch request.outputLanguage {
-        case .auto:
-            languageInstruction = "Automatically keep the most suitable language from the input (English or Chinese)."
-        case .en:
-            languageInstruction = "Output in English."
-        case .cn:
-            languageInstruction = "Output in Chinese."
-        }
-
-        return "You improve social media post drafts for X. Fix grammar and readability while preserving factual meaning. \(toneInstruction) \(languageInstruction) Keep hashtags and mentions if they are present."
+    private func systemPrompt() -> String {
+        "You polish drafts for X with minimal edits. Keep the author's original voice and intent. Only fix necessary typos, grammar, punctuation, and syntax errors. Do not rewrite style, change tone, add new claims, or remove existing meaning. Keep hashtags, mentions, links, and line breaks unless a minimal correction is required."
     }
 }
 
