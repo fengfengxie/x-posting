@@ -21,6 +21,9 @@
 - [x] Wire `script/build.sh` and `script/test.sh` to real commands.
 - [x] Update v1.0 docs from templates to current MVP spec.
 
+## Known Issues
+- Menubar `Attach Image`: after selecting a file in the Finder open panel, both the open panel and menubar close, and the image is not attached when reopening the menubar. Fix should prioritize completing the image attach even if the menubar panel dismisses, rather than keeping the panel open.
+
 ## Notes
 - Date: 2026-02-13
 - Current publish integration includes single image upload path and thread posting logic.
