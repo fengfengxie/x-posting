@@ -40,6 +40,7 @@ final class ComposerViewModel: ObservableObject {
     private var hasBootstrapped = false
     private var hasLoadedXCredentials = false
     private var lastPrePolishText: String?
+    private let lastImageDirectoryDefaultsKey = "xposting.lastImageDirectoryPath"
 
     init(
         draftStore: DraftStore,
@@ -221,6 +222,18 @@ final class ComposerViewModel: ObservableObject {
         } catch {
             setStatus("Failed to attach image: \(error.localizedDescription)", isError: true)
         }
+    }
+
+    func preferredImageDirectoryURL() -> URL? {
+        guard let path = UserDefaults.standard.string(forKey: lastImageDirectoryDefaultsKey), !path.isEmpty else {
+            return nil
+        }
+        return URL(fileURLWithPath: path, isDirectory: true)
+    }
+
+    func rememberImageDirectory(from selectedFileURL: URL) {
+        let directoryURL = selectedFileURL.deletingLastPathComponent()
+        UserDefaults.standard.set(directoryURL.path, forKey: lastImageDirectoryDefaultsKey)
     }
 
     func removeImage() {

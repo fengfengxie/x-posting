@@ -164,10 +164,12 @@ struct MenuBarContentView: View {
             panel.canChooseDirectories = false
             panel.canChooseFiles = true
             panel.hidesOnDeactivate = false
-            panel.level = .floating
-            // Use runModal so selection completes even if the menubar panel dismisses.
+            panel.level = .normal
+            panel.directoryURL = viewModel.preferredImageDirectoryURL()
+            // Run outside the menubar click event so folder changes don't collapse the panel.
             let response = panel.runModal()
             guard response == .OK, let url = panel.url ?? panel.urls.first else { return }
+            viewModel.rememberImageDirectory(from: url)
             viewModel.attachImage(at: url)
         }
     }
