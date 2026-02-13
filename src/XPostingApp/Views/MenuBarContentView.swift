@@ -34,19 +34,19 @@ struct MenuBarContentView: View {
             .foregroundStyle(.secondary)
 
             HStack {
-                Button("Polish") {
-                    viewModel.polishDraft()
-                }
-                .disabled(viewModel.isPolishing || viewModel.isPublishing)
-
                 Button("Publish") {
                     viewModel.publishDraft()
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
                 .disabled(viewModel.isPolishing || viewModel.isPublishing)
 
-                Button("Copy") {
-                    viewModel.copyDraftToClipboard()
+                Button("Fix Text") {
+                    viewModel.polishDraft()
                 }
+                .buttonStyle(.borderedProminent)
+                .tint(.blue)
+                .disabled(viewModel.isPolishing || viewModel.isPublishing)
             }
 
             HStack {

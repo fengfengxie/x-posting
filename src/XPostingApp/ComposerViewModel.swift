@@ -1,4 +1,3 @@
-import AppKit
 import Foundation
 import XPostingCore
 
@@ -169,13 +168,6 @@ final class ComposerViewModel: ObservableObject {
             }
             isPublishing = false
         }
-    }
-
-    func copyDraftToClipboard() {
-        let value = draftText
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(value, forType: .string)
-        setStatus("Copied draft to clipboard.", isError: false)
     }
 
     func attachImage(at url: URL) {
