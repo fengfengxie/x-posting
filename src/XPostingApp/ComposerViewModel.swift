@@ -23,6 +23,7 @@ final class ComposerViewModel: ObservableObject {
     @Published var statusMessage: String?
     @Published var statusIsError: Bool = false
     @Published var canRevertPolish: Bool = false
+    @Published var publishedPostURL: URL?
 
     @Published var isPolishing: Bool = false
     @Published var isPublishing: Bool = false
@@ -180,7 +181,8 @@ final class ComposerViewModel: ObservableObject {
                     imagePath = nil
                     try await draftStore.clear()
                     refreshAnalysis()
-                    setStatus("Published \(result.postIDs.count) post(s).", isError: false)
+                    let postURL = result.postIDs.first.map { URL(string: "https://x.com/i/web/status/\($0)")! }
+                    setStatus("Published \(result.postIDs.count) post(s).", isError: false, publishedPostURL: postURL)
                 } else {
                     setStatus(result.errorMessage ?? "Publish failed.", isError: true)
                 }
@@ -343,10 +345,11 @@ final class ComposerViewModel: ObservableObject {
         return try Data(contentsOf: url)
     }
 
-    private func setStatus(_ message: String, isError: Bool, canRevertPolish: Bool = false) {
+    private func setStatus(_ message: String, isError: Bool, canRevertPolish: Bool = false, publishedPostURL: URL? = nil) {
         statusMessage = message
         statusIsError = isError
         self.canRevertPolish = canRevertPolish
+        self.publishedPostURL = publishedPostURL
         if !canRevertPolish {
             lastPrePolishText = nil
         }

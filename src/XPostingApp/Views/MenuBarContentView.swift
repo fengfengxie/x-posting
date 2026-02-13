@@ -130,6 +130,16 @@ struct MenuBarContentView: View {
                         .foregroundStyle(.blue)
                         .underline()
                     }
+
+                    if let postURL = viewModel.publishedPostURL {
+                        Button("Open Post") {
+                            NSWorkspace.shared.open(postURL)
+                        }
+                        .buttonStyle(.plain)
+                        .font(.caption)
+                        .foregroundStyle(.blue)
+                        .underline()
+                    }
                 }
             }
 

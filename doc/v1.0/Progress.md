@@ -42,4 +42,5 @@
 - UX polish: Repositioned `Homepage` to the panel header (top-right, same row as `Quick Draft`) for faster access and less footer clutter.
 - Bugfix: Deferred Keychain credential reads until needed (e.g., Settings open / publish flow) instead of loading at app bootstrap, so startup no longer triggers immediate Keychain prompts.
 - UX polish: After a successful `Fix Text`, status now shows a clickable `Revert` link that restores the exact pre-polish draft and then hides itself.
+- UX polish: Publish success feedback now includes an inline `Open Post` hyperlink action using the returned post ID, enabling one-click verification after posting.
 - Docs: Rewrote README for public repo readiness (motivation, features, getting started, project structure, tech stack). Updated GitHub repo description.
