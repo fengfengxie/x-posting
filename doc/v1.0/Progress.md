@@ -44,3 +44,4 @@
 - UX polish: After a successful `Fix Text`, status now shows a clickable `Revert` link that restores the exact pre-polish draft and then hides itself.
 - UX polish: Publish success feedback now includes an inline `Open Post` hyperlink action using the returned post ID, enabling one-click verification after posting.
 - Docs: Rewrote README for public repo readiness (motivation, features, getting started, project structure, tech stack). Updated GitHub repo description.
+- Bugfix: Image attach open panel now uses `runModal()` instead of async `begin()`, preventing the menubar panel from dismissing when the user interacts with the file picker. Previously, clicking a file in the open panel would steal focus from the menubar, causing both the panel and the open dialog to close before the selection completed.

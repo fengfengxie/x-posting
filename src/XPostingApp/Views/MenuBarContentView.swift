@@ -161,12 +161,10 @@ struct MenuBarContentView: View {
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = false
         panel.level = .popUpMenu
-        panel.begin { response in
-            guard response == .OK, let url = panel.url else { return }
-            Task { @MainActor in
-                viewModel.attachImage(at: url)
-            }
-        }
+        // Use runModal to prevent the menubar panel from dismissing on interaction.
+        let response = panel.runModal()
+        guard response == .OK, let url = panel.url else { return }
+        viewModel.attachImage(at: url)
     }
 
     private func openHomepage() {
