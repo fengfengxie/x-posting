@@ -45,4 +45,4 @@
 - UX polish: Publish success feedback now includes an inline `Open Post` hyperlink action using the returned post ID, enabling one-click verification after posting.
 - Docs: Rewrote README for public repo readiness (motivation, features, getting started, project structure, tech stack). Updated GitHub repo description.
 - Bugfix: Image attach open panel now uses `runModal()` instead of async `begin()`, preventing the menubar panel from dismissing when the user interacts with the file picker. Previously, clicking a file in the open panel would steal focus from the menubar, causing both the panel and the open dialog to close before the selection completed.
-- Bugfix: Menubar image attach now activates the app and uses a standard-level `NSOpenPanel` so file selection completes even if the menubar panel closes.
+- Bugfix: Menubar image attach now activates the app, delays presentation to the next run loop, and uses a floating `NSOpenPanel` so the picker reliably appears and completes selection even if the menubar panel closes.

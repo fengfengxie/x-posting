@@ -156,16 +156,20 @@ struct MenuBarContentView: View {
     }
 
     private func openImagePanel() {
-        let panel = NSOpenPanel()
-        panel.allowedContentTypes = [.image]
-        panel.allowsMultipleSelection = false
-        panel.canChooseDirectories = false
-        panel.canChooseFiles = true
         NSApp.activate(ignoringOtherApps: true)
-        // Use runModal so selection completes even if the menubar panel dismisses.
-        let response = panel.runModal()
-        guard response == .OK, let url = panel.url ?? panel.urls.first else { return }
-        viewModel.attachImage(at: url)
+        DispatchQueue.main.async {
+            let panel = NSOpenPanel()
+            panel.allowedContentTypes = [.image]
+            panel.allowsMultipleSelection = false
+            panel.canChooseDirectories = false
+            panel.canChooseFiles = true
+            panel.hidesOnDeactivate = false
+            panel.level = .floating
+            // Use runModal so selection completes even if the menubar panel dismisses.
+            let response = panel.runModal()
+            guard response == .OK, let url = panel.url ?? panel.urls.first else { return }
+            viewModel.attachImage(at: url)
+        }
     }
 
     private func openHomepage() {
