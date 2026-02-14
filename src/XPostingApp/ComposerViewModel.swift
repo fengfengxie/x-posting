@@ -193,22 +193,22 @@ final class ComposerViewModel: ObservableObject {
 
     func openComposePostForImageEditing() {
         let trimmedText = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
-        var components = URLComponents(string: "https://x.com/compose/post")
-
-        if !trimmedText.isEmpty {
-            components?.queryItems = [URLQueryItem(name: "text", value: trimmedText)]
-        }
-
-        guard let url = components?.url else {
+        guard let url = URL(string: "https://x.com/compose/post") else {
             setStatus("Failed to open X compose page.", isError: true)
             return
+        }
+
+        if !trimmedText.isEmpty {
+            let pasteboard = NSPasteboard.general
+            pasteboard.clearContents()
+            pasteboard.setString(trimmedText, forType: .string)
         }
 
         NSWorkspace.shared.open(url)
         if trimmedText.isEmpty {
             setStatus("Opened X compose page for image editing.", isError: false)
         } else {
-            setStatus("Opened X compose page with current draft text.", isError: false)
+            setStatus("Copied draft to clipboard and opened X compose page.", isError: false)
         }
     }
 
