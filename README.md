@@ -11,7 +11,7 @@ Posting on X means opening X, and opening X means doomscrolling. X Posting keeps
 - **Menubar-first workflow** — draft, polish, and publish directly from the macOS menu bar. No separate windows needed.
 - **AI text polish** — one-click grammar and typo fixes powered by DeepSeek, with instant revert if you prefer the original.
 - **Thread auto-split** — live character count with automatic thread segmentation when your post exceeds the limit.
-- **Planned image attachment** — `Attach Image` is currently a placeholder and not yet implemented.
+- **Image Attachment** — `Attach Image` directly jumps to https://x.com/compose/post for complex editing, with draft text being copied into clipboard for easy paste.
 - **Safe failure handling** — publish errors never lose your draft; content stays in the editor with a copy fallback.
 - **OAuth 1.0a** — paste your X API keys once; tokens never expire, no browser redirect needed.
 
