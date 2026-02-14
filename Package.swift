@@ -18,7 +18,10 @@ let package = Package(
         .executableTarget(
             name: "XPostingApp",
             dependencies: ["XPostingCore"],
-            path: "src/XPostingApp"
+            path: "src/XPostingApp",
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
             name: "XPostingCoreTests",

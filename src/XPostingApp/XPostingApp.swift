@@ -7,6 +7,10 @@ struct XPostingApp: App {
 
     init() {
         NSApplication.shared.setActivationPolicy(.accessory)
+        if let iconURL = Bundle.module.url(forResource: "AppIcon", withExtension: "icns"),
+           let iconImage = NSImage(contentsOf: iconURL) {
+            NSApplication.shared.applicationIconImage = iconImage
+        }
     }
 
     var body: some Scene {
