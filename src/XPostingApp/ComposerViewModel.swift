@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 import XPostingCore
 
@@ -190,8 +191,25 @@ final class ComposerViewModel: ObservableObject {
         }
     }
 
-    func showAttachImagePlaceholder() {
-        setStatus("Feature to be implemented.", isError: false)
+    func openComposePostForImageEditing() {
+        let trimmedText = draftText.trimmingCharacters(in: .whitespacesAndNewlines)
+        var components = URLComponents(string: "https://x.com/compose/post")
+
+        if !trimmedText.isEmpty {
+            components?.queryItems = [URLQueryItem(name: "text", value: trimmedText)]
+        }
+
+        guard let url = components?.url else {
+            setStatus("Failed to open X compose page.", isError: true)
+            return
+        }
+
+        NSWorkspace.shared.open(url)
+        if trimmedText.isEmpty {
+            setStatus("Opened X compose page for image editing.", isError: false)
+        } else {
+            setStatus("Opened X compose page with current draft text.", isError: false)
+        }
     }
 
     func saveSettings() {

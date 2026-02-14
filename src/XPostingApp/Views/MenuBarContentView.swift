@@ -66,7 +66,7 @@ struct MenuBarContentView: View {
                 .disabled(viewModel.isPolishing || viewModel.isPublishing)
 
                 Button {
-                    viewModel.showAttachImagePlaceholder()
+                    viewModel.openComposePostForImageEditing()
                 } label: {
                     Label("Attach Image", systemImage: "paperclip")
                 }
