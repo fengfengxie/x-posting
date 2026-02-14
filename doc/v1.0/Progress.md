@@ -52,3 +52,4 @@
 - UX change: Replaced in-app menubar image picker flow with a direct jump to `https://x.com/compose/post` from `Attach Image`; when draft text is present, it is carried into the compose URL via `text` query so users can continue image-heavy editing directly on X.
 - UX optimization: `Attach Image` now copies non-empty draft text to clipboard before opening `https://x.com/compose/post`, enabling immediate paste (`Cmd+V`) in X web composer when URL prefill is not honored.
 - Bugfix: App startup now enforces `NSApplication.ActivationPolicy.accessory`, removing Dock presence and keeping the app menubar-only across launch contexts.
+- Docs: Added a `Demo` section to `README.md` and linked tracked screenshot asset `doc/assets/demo.png` to show current menubar UI.

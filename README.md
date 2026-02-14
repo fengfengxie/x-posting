@@ -6,6 +6,10 @@ A lightweight macOS menubar app for drafting, polishing, and publishing posts to
 
 Posting on X means opening X, and opening X means doomscrolling. X Posting keeps you focused: draft from the menubar, polish with AI, hit publish, and get back to work.
 
+## Demo
+
+![X Posting menubar interface](doc/assets/demo.png)
+
 ## Features
 
 - **Menubar-first workflow** — draft, polish, and publish directly from the macOS menu bar. No separate windows needed.
